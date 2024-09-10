@@ -17,6 +17,8 @@
 #define SERVO_UP 1250
 #define SERVO_DOWN_NORM 500
 #define SERVO_DOWN_REVERSE 2000  // for segment 2 and 3 since they are reversed
+#define SERVO_HALF_DOWN_NORM 800
+#define SERVO_HALF_DOWN_REVERSE 1700
 
 
 //0b 0 0 0 0 0 0 0 0
@@ -40,18 +42,70 @@ public:
   Digit(uint8_t address) {
     init();
     _address = address;
+    _servos = 0;
 
     PCA_setup();
   };
 
+  void clear_digit() {
+    PCA_setup();
+    clear();
+  }
+
+  void write(uint8_t value) {
+    PCA_setup();
+    uint8_t mask = pgm_read_byte(&font[value]);
+
+
+    for (int8_t i = 0; i <= 7; i++) {
+      if (mask & (1 << i)) {
+        
+        write_servo(7 - i, 1);
+        // delay(100);
+      } else {
+        
+        write_servo(7 - i, 0);
+      }
+    }
+
+  }
+
+  void move_half_down(uint8_t servo_number) {
+
+    Wire.beginTransmission(_address);
+
+    Wire.write(LED0_ON_L + (servo_number - 1) * 4);
+    Wire.write(0x00);
+    Wire.write(0x00);
+
+    if (servo_number == 2 || servo_number == 3) {
+      Wire.write(byte(SERVO_HALF_DOWN_REVERSE));
+      Wire.write(byte(SERVO_HALF_DOWN_REVERSE >> 8));
+    } else {
+      Wire.write(byte(SERVO_HALF_DOWN_NORM));
+      Wire.write(byte(SERVO_HALF_DOWN_NORM >> 8));
+    }
+
+    Wire.endTransmission();
+  }
 
   void write_servo(uint8_t servo_number, uint8_t value) {  // 1 - up, 0 - down
 
-    if (servo_number == 7){
-      write_servo(3, 0);
-      write_servo(5, 0);
-      delay(400);
-      
+    
+    if (servo_number == 7) {
+      uint8_t pos = (1 << bitRead(_servos, 5)) | (1 << bitRead(_servos, 3));
+
+      if (bitRead(_servos, 0) == value) return;
+      if (bitRead(_servos, 5)) { // servo 3
+        move_half_down(3);
+      }
+      if (bitRead(_servos, 3)) { // servo 5
+        move_half_down(5);
+      }
+      delay(300);
+
+      write_servo(3, bitRead(pos, 5));
+      write_servo(5, bitRead(pos, 3));
     }
 
     Wire.beginTransmission(_address);
@@ -60,17 +114,15 @@ public:
     Wire.write(0x00);
     Wire.write(0x00);
 
-    
+
     if (value) {
       Wire.write(byte(SERVO_UP));
       Wire.write(byte(SERVO_UP >> 8));
-    }
-    else {
+    } else {
       if (servo_number == 2 || servo_number == 3) {
         Wire.write(byte(SERVO_DOWN_REVERSE));
         Wire.write(byte(SERVO_DOWN_REVERSE >> 8));
-      }
-      else {
+      } else {
         Wire.write(byte(SERVO_DOWN_NORM));
         Wire.write(byte(SERVO_DOWN_NORM >> 8));
       }
@@ -78,17 +130,21 @@ public:
 
     Wire.endTransmission();
 
-    
+    if (value) _servos |= (1 << (7 -servo_number));
+    else _servos &= ~(1 << (7 - servo_number));
 
-    if (servo_number == 7){
-      delay(400);
-      write_servo(3, 1);
-      write_servo(5, 1);
-      
-    }
+
   }
 
 private:
+
+  void clear() {
+    _servos = 255;
+    for (int8_t i = 7; i >= 0; i--) {
+      write_servo(7 - i, 0);
+    }
+    _servos = 0;
+  }
 
   void PCA_setup() {
 
@@ -109,5 +165,5 @@ private:
 
   uint8_t _address;
   uint8_t value;
-  bool servos[7];
+  uint8_t _servos;
 };

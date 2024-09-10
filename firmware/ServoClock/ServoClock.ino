@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include "Digit.h"
+#include "Timer.h"
 
 #define ADDRESS 0x40
 
@@ -12,58 +13,32 @@
 // value 345 is around 0 degrees rotation
 // value 2130 is around 180 degrees rotation
 Digit digit1(ADDRESS);
-
+int servo_value;
 void setup() {
 
   Wire.begin();
   Serial.begin(9600);
+  digit1.clear_digit();
 
-
-
-
-  // Wire.beginTransmission(ADDRESS);
-  // Wire.write(MODE1);
-  // Wire.write(0b00100001);
-
-  // Wire.endTransmission();
-
-  // Wire.beginTransmission(ADDRESS);
-  // Wire.write(MODE2);
-  // Wire.write(0b00000100);
-
-  // Wire.endTransmission();
 }
-int servo_value;
+
+Timer timer(1200);
+int value = 0;
+
 void loop() {
+  if(timer.isReady()){
+    
+    value++;
+    if (value == 10) value = 0;
+
+    digit1.write(value);
+  } 
+  
+
+
   if (Serial.available() > 1) {
     servo_value = Serial.parseInt();
+    digit1.write(servo_value);
 
-    digit1.write_servo(1, servo_value);
-    delay(1000);
-    digit1.write_servo(2, servo_value);
-    delay(1000);
-    digit1.write_servo(3, servo_value);
-    delay(1000);
-    digit1.write_servo(4, servo_value);
-    delay(1000);
-    digit1.write_servo(5, servo_value);
-    delay(1000);
-
-    digit1.write_servo(6, servo_value);
-    delay(1000);
-    digit1.write_servo(7, servo_value);
   }
-
-
-
-  //   Wire.beginTransmission(ADDRESS);
-
-  // Wire.write(LED0_ON_L);
-  // Wire.write(0x00);
-  // Wire.write(0x00);
-  // Wire.write(byte(value));
-  // Wire.write(byte(value >> 8));
-  // Wire.endTransmission();
-  // Serial.println(value);
 }
-
