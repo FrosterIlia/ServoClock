@@ -41,6 +41,7 @@ const uint8_t font[] PROGMEM = { D_0, D_1, D_2, D_3, D_4, D_5, D_6, D_7, D_8, D_
 
 class Digit {
 public:
+
   Digit(uint8_t address) {
     init();
     _address = address;
@@ -73,9 +74,10 @@ public:
   void tick() {
     if (millis() - timer > TIMEOUT && timer_started) {
       timer_started = 0;
-      Serial.println("timer done");
+      // Serial.println("timer done");
       move_side_servos();
     }
+    
   }
 
 private:
@@ -171,8 +173,6 @@ private:
 
     Wire.endTransmission();
   }
-
-
 
   uint8_t _address;
   uint8_t value;

@@ -3,8 +3,7 @@
 #include "Timer.h"
 #include "Display.h"
 
-#define ADDRESS1 0x40
-#define ADDRESS2 0x41
+
 
 #define LED0_ON_L 0x06
 #define LED0_ON_H 0x07
@@ -16,33 +15,39 @@
 // value 345 is around 0 degrees rotation
 // value 2130 is around 180 degrees rotation
 
-Digit digit1(ADDRESS1);
-Digit digit2(ADDRESS2);
 
+Display display;
 
 void setup() {
 
   Wire.begin();
   Serial.begin(9600);
-  digit1.clear_digit();
-  digit2.clear_digit();
+  display.clear();
 
+  pinMode(2, INPUT_PULLUP);
+  pinMode(4, INPUT_PULLUP);
+
+  // Serial.println("hello1");
+
+  // Serial.println("hello2");
+ 
 }
 
-Timer timer(2000);
+Timer timer(2500);
 int value = 0;
-
 void loop() {
-  digit1.tick();
-  digit2.tick();
+  display.tick();
 
-  if (timer.isReady()) {
+
+  // Serial.print(digitalRead(2));
+  // Serial.print(" ");
+  // Serial.println(digitalRead(4));
+  if (timer.isReady() && digitalRead(2)) {
 
     value++;
     if (value == 10) value = 0;
+    display.write_number(1533);
 
-    digit1.write(value);
-    digit2.write(value);
 
   }
 }
