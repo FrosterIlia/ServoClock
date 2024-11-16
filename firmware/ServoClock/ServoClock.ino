@@ -2,6 +2,7 @@
 #include "Digit.h"
 #include "Timer.h"
 #include "Display.h"
+#include "RTC.h"
 
 
 
@@ -17,15 +18,19 @@
 
 
 Display display;
+RTC rtc;
 
 void setup() {
 
   Wire.begin();
-  Serial.begin(9600);
+  //Serial.begin(9600);
   display.clear();
 
   pinMode(2, INPUT_PULLUP);
   pinMode(4, INPUT_PULLUP);
+
+  rtc.set_sys_time();
+
 
   // Serial.println("hello1");
 
@@ -33,8 +38,8 @@ void setup() {
  
 }
 
-Timer timer(2500);
-int value = 0;
+Timer timer(1000);
+int value = 2359;
 void loop() {
   display.tick();
 
@@ -45,8 +50,10 @@ void loop() {
   if (timer.isReady() && digitalRead(2)) {
 
     value++;
-    if (value == 10) value = 0;
-    display.write_number(1533);
+    // if (value == 10) value = 0;
+    rtc.request_time();
+    // display.write_number(rtc.get_hours() * 100 + rtc.get_minutes());
+    display.write_number(value);
 
 
   }

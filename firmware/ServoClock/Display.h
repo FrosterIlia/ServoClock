@@ -11,15 +11,17 @@
 #define DIGITS_NUMBER 4
 
 
-// Digit digit1(ADDRESS1);
-// Digit digit2(ADDRESS2);
-// Digit digit3(ADDRESS3);
-// Digit digit4(ADDRESS4);
-
-
 Digit digits[DIGITS_NUMBER] = { ADDRESS1, ADDRESS2, ADDRESS3, ADDRESS4 };
 
+uint16_t myPow(uint16_t number, uint16_t power){
+  uint16_t result = number;
+  for (uint8_t i = 0; i < power - 1; i++){
+    
+    result *= number;
+  }
 
+  return result;
+}
 
 class Display {
 public:
@@ -34,17 +36,21 @@ public:
     }
   }
 
-  void write_number(uint16_t number) {
+  void write_number(int number) {
     uint8_t number_length = count_digits(number);
-    uint16_t divisor = pow(10, number_length - 1);
+
+    uint16_t divisor = myPow(10, number_length - 1);
+    Serial.println(divisor);
+
 
     for (uint8_t i = 0; i < number_length; i++) {
-      digits[i].write(number / divisor); 
+
+      digits[i].write(number / divisor);
 
       number %= divisor;
       divisor /= 10;
     }
-    for (uint8_t i = number_length; i < DIGITS_NUMBER; i++){
+    for (uint8_t i = number_length; i < DIGITS_NUMBER; i++) {
       Serial.println(i);
       digits[i].clear_digit();
     }
@@ -75,3 +81,4 @@ private:
     return digits;
   }
 };
+
