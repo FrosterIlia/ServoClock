@@ -71,6 +71,10 @@ public:
     }
   }
 
+  uint8_t get_value(){
+    return value;
+  }
+
   void tick() {
     if (millis() - timer > TIMEOUT && timer_started) {
       timer_started = 0;

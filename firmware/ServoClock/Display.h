@@ -40,19 +40,18 @@ public:
     uint8_t number_length = count_digits(number);
 
     uint16_t divisor = myPow(10, number_length - 1);
-    Serial.println(divisor);
+    
 
 
-    for (uint8_t i = 0; i < number_length; i++) {
+    for (uint8_t i = DIGITS_NUMBER - number_length; i < DIGITS_NUMBER; i++) {
 
       digits[i].write(number / divisor);
 
       number %= divisor;
       divisor /= 10;
     }
-    for (uint8_t i = number_length; i < DIGITS_NUMBER; i++) {
-      Serial.println(i);
-      digits[i].clear_digit();
+    for (uint8_t i = 0; i < DIGITS_NUMBER - number_length; i++) {
+      digits[i].write(0);
     }
   }
 
@@ -64,6 +63,14 @@ public:
     for (uint8_t i = 0; i <= DIGITS_NUMBER; i++) {
       digits[i].clear_digit();
     }
+  }
+
+  void clear_digit(uint8_t digit){
+    digits[digit].clear_digit();
+  }
+
+  uint8_t get_digit(uint8_t digit){
+    return digits[digit].get_value();
   }
 
 private:
@@ -80,5 +87,6 @@ private:
 
     return digits;
   }
+
 };
 
